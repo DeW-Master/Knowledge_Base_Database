@@ -1,4 +1,4 @@
-package Database;
+package DataBase;
 
 import Table.Table;
 
@@ -8,11 +8,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class Database {
+public class DataBase {
     public String filepath;
     public HashMap<String, Table> database = new HashMap<>();
 
-    public Database(String filepath) {
+    public DataBase(String filepath) {
         this.filepath = filepath;
         this.constructDataBase();
     }

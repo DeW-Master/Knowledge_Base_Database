@@ -26,8 +26,6 @@ public class Table {
 
     public void addNewRow(String str) {
         String[] records = str.split(",");
-        if (records.length != title.size())
-            System.out.println("Invalid Record");
         ArrayList<String> row = new ArrayList<>();
         for (String record :
                 records) {
