@@ -1,3 +1,6 @@
+import DataBase.DataBase;
+import Table.*;
+
 import java.util.Scanner;
 
 public class Main {
@@ -18,7 +21,7 @@ public class Main {
             Engine provenanceSemiring = new Engine(Integer.valueOf(type), dataBase);
             try {
                 Table res = provenanceSemiring.calculate(query);
-                TablePrinter.print(res);
+                res.print();
             } catch (Exception e) {
                 e.printStackTrace();
             }

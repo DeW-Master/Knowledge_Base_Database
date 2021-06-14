@@ -1,3 +1,6 @@
+import DataBase.DataBase;
+import Table.Table;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
@@ -7,9 +10,6 @@ public class Engine {
     public int type;
     public DataBase dataBase;
 
-    public Engine(){
-
-    }
 
     public Engine(int type, DataBase dataBase) {
         this.type = type;
@@ -268,7 +268,7 @@ public class Engine {
         Table projectTable = new Table("projectTable");
         String[] columnArr = columns.split(",");
         String columnsAndannotation = columns+",annotation";
-        projectTable.createTitle(columnsAndannotation);
+        projectTable.createColumn(columnsAndannotation);
 
         for (String column:
                 projectTable.title) {
