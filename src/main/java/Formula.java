@@ -8,6 +8,11 @@ public class Formula {
     public int type;
     public DataBase dataBase;
 
+    public Formula(int type, DataBase dataBase) {
+        this.type = type;
+        this.dataBase = dataBase;
+    }
+
     /**
      * project -> @
      * selecte -> #
@@ -16,6 +21,7 @@ public class Formula {
      * @param formula
      * @return
      */
+
     private String formate(String formula) {
         return formula.replaceAll("project", "@")
                 .replaceAll("select", "#")
