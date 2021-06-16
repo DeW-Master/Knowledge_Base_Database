@@ -1,0 +1,4 @@
+Query 1 for Bag:
+project<patient_id,first_name>(Clinique.Record)
+Query 2 for Bag and probability:
+project<X,Z>((project<X,Y>(simpleRelation) join project<Y,Z>(simpleRelation)) union (project<X,Z>(simpleRelation) join project<Y,Z>(simpleRelation)))

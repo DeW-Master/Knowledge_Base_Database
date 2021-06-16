@@ -229,8 +229,7 @@ public class Engine {
         l_selectTable.column = p_table.column;
         l_selectTable.title = p_table.title;
 
-        for (ArrayList<String> eachLineInTable :
-                p_table.content) {
+        for (ArrayList<String> eachLineInTable : p_table.content) {
             boolean satisfyCondition = true;
 
             for (int i = 0; i < separateConditions.length; i++) {
@@ -296,10 +295,9 @@ public class Engine {
         String l_columnsAndannotation = p_columns + ",annotation";
         l_projectTable.createColumn(l_columnsAndannotation);
 
-        for (String column :
-                l_projectTable.title) {
+        for (String column : l_projectTable.title) {
             if (!p_table.title.contains(column)) {
-                throw new Exception("wrong project column");
+                throw new Exception("ERROR: wrong project column");
             }
         }
         ArrayList<ArrayList<String>> newContent = new ArrayList<ArrayList<String>>();

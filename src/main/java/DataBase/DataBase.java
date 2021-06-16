@@ -30,6 +30,7 @@ public class DataBase {
      * build database from resource directory
      */
     private void buildDB() {
+        System.out.println("Loading Data....");
         File file = new File(this.filepath);
         File[] files = file.listFiles();
 

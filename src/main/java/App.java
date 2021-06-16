@@ -10,8 +10,9 @@ public class App {
     public static void main(String[] args) {
 
         System.out.println("====== Welcome to Annotation Log System ======");
-        System.out.println("Loading Data....");
-        DataBase dataBase = new DataBase("src/main/resources");
+
+        DataBase dataBase = new DataBase("src/main/resources/db");
+
 
         while (true) {
             Scanner s = new Scanner(System.in);
