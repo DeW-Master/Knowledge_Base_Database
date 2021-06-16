@@ -893,7 +893,7 @@ first_name, last_name, phone, email, street, city, state, zip_code
 'Alissa','Craft',NULL,'alissa.craft@hotmail.com','249 Maple Street ','Ossining','NY',10562
 'Letty','Cobb',NULL,'letty.cobb@msn.com','8652 Wellington Street ','Depew','NY',14043
 'Nathaniel','Richard',NULL,'nathaniel.richard@gmail.com','3 Nicolls Lane ','New Windsor','NY',12553
-'Elaina','Key',NULL,'elaina.key@msn.com','1 Main St. ','Plainview','NY',11803
+'Elaina','Key',NULL,'elaina.key@msn.com','1 App St. ','Plainview','NY',11803
 'Stefani','Gamble','(845) 724-2996','stefani.gamble@aol.com','9119 W. Victoria St. ','New City','NY',10956
 'Bettyann','Acosta','(717) 746-6658','bettyann.acosta@gmail.com','7949 Chapel St. ','Lancaster','NY',14086
 'Crysta','Velez','(281) 529-3469','crysta.velez@yahoo.com','64 South Front Street ','Houston','TX',77016
@@ -1218,7 +1218,7 @@ first_name, last_name, phone, email, street, city, state, zip_code
 'Carlie','Terrell','(914) 517-8036','carlie.terrell@yahoo.com','7437 Snake Hill Road ','Yonkers','NY',10701
 'Donovan','Cantrell','(510) 624-3824','donovan.cantrell@msn.com','601 Winchester Dr. ','Oakland','CA',94603
 'Alden','Atkinson',NULL,'alden.atkinson@gmail.com','46 Valley St. ','Shirley','NY',11967
-'Carissa','Cross',NULL,'carissa.cross@yahoo.com','9335 West Main Dr. ','Huntington Station','NY',11746
+'Carissa','Cross',NULL,'carissa.cross@yahoo.com','9335 West App Dr. ','Huntington Station','NY',11746
 'Joy','Underwood',NULL,'joy.underwood@gmail.com','7297 Armstrong Dr. ','Apple Valley','CA',92307
 'Geraldine','O''donnell',NULL,'geraldine.o''donnell@hotmail.com','8241 Lookout Rd. ','Flushing','NY',11354
 'Bronwyn','Vargas',NULL,'bronwyn.vargas@msn.com','35 James Street ','New Windsor','NY',12553

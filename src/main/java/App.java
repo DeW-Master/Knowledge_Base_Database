@@ -3,17 +3,17 @@ import Table.*;
 
 import java.util.Scanner;
 
+/**
+ * the driver
+ */
 public class App {
-
-
-
     public static void main(String[] args) {
 
         System.out.println("====== Welcome to Annotation Log System ======");
         System.out.println("Loading Data....");
         DataBase dataBase = new DataBase("src/main/resources");
 
-        while(true){
+        while (true) {
             Scanner s = new Scanner(System.in);
             System.out.println("----- Please Input your query ----- ");
             String query = s.nextLine();
@@ -29,7 +29,7 @@ public class App {
                 break;
             Engine l_annoEngine = new Engine(Integer.valueOf(type), dataBase);
             try {
-                Table res = l_annoEngine.calculate(query);
+                Table res = l_annoEngine.executeQuery(query);
                 res.print();
             } catch (Exception e) {
                 e.printStackTrace();

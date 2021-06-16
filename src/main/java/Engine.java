@@ -5,60 +5,71 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
+/**
+ * the annotation based engine
+ */
 public class Engine {
 
-    public int type;
-    public DataBase dataBase;
+    /**
+     * p_operationType 1 : bag 2 : probability  3 : certainty  4 : polynomial 5 : normal
+     */
+    public int d_type;
+    /**
+     * the database
+     */
+    public DataBase d_dataBase;
 
 
-    public Engine(int type, DataBase dataBase) {
-        this.type = type;
-        this.dataBase = dataBase;
+    public Engine(int p_type, DataBase p_dataBase) {
+        this.d_type = p_type;
+        this.d_dataBase = p_dataBase;
     }
 
     /**
+     * execute query from input
+     *
      * project -> @
-     * selecte -> #
+     * select -> #
      * join -> *
      * union -> +
-     * @param formula
+     * @param p_queryFormula
      * @return
      */
-    public Table calculate(String formula) throws Exception {
+    public Table executeQuery(String p_queryFormula) throws Exception {
         Stack<String> operation = new Stack<>();
         Stack<Table> result = new Stack<>();
 
-        formula = formate(formula);
+        p_queryFormula = formate(p_queryFormula);
 
-        for (int i = 0 ; i < formula.length() ; i ++){
-            String op = formula.substring(i, i + 1);
+        for (int i = 0; i < p_queryFormula.length(); i++) {
+            String op = p_queryFormula.substring(i, i + 1);
 
-            if (op.equals("(")){
+            if (op.equals("(")) {
                 operation.push(op);
 
-            } else if (op.equals("@")){
-                String p = getProjectOrSelect(i, formula);
+            } else if (op.equals("@")) {
+                String p = getProjectOrSelect(i, p_queryFormula);
                 i = i + p.length() - 1;
                 operation.push(p);
 
-            } else if (op.equals("#")){
-                String s = getProjectOrSelect(i, formula);
+            } else if (op.equals("#")) {
+                String s = getProjectOrSelect(i, p_queryFormula);
                 i = i + s.length() - 1;
                 operation.push(s);
 
-            } else if (op.equals("*")){
+            } else if (op.equals("*")) {
                 operation.push("*");
 
-            } else if (op.equals("+")){
+            } else if (op.equals("+")) {
                 operation.push("+");
 
-            } else if (op.equals(")")){
+            } else if (op.equals(")")) {
                 String operator1 = operation.pop();
                 String operator2 = operation.pop();
                 Table res;
 
-                if (operator1.equals("(")){
-                    if (operator2.contains("@") || operator2.contains("#")){
+                if (operator1.equals("(")) {
+                    if (operator2.contains("@") || operator2.contains("#")) {
                         Table t1 = result.pop();
                         res = executeUnaryOp(operator2, t1);
                     } else {
@@ -67,7 +78,7 @@ public class Engine {
                         res = executeBiOp(operator2, t1, t2);
                     }
                 } else {
-                    if (operator1.contains("@") || operator2.contains("#")){
+                    if (operator1.contains("@") || operator2.contains("#")) {
                         Table t1 = result.pop();
                         res = executeUnaryOp(operator1, t1);
                     } else {
@@ -78,22 +89,22 @@ public class Engine {
                 }
                 result.push(res);
 
-            } else if(op.equals(" ")){
+            } else if (op.equals(" ")) {
                 continue;
             } else {
-                String tableName = getTableName(i, formula);
+                String tableName = getTableName(i, p_queryFormula);
                 i = i + tableName.length() - 1;
-                Table table = dataBase.database.get(tableName);
+                Table table = d_dataBase.database.get(tableName);
                 result.push(table);
             }
 
         }
-        if (operation.size() != 0){
+        if (operation.size() != 0) {
             String op = operation.pop();
-            if (op.contains("@") || op.contains("#")){
-                 Table table = result.pop();
-                 result.push(executeUnaryOp(op, table));
-            } else{
+            if (op.contains("@") || op.contains("#")) {
+                Table table = result.pop();
+                result.push(executeUnaryOp(op, table));
+            } else {
                 Table table1 = result.pop();
                 Table table2 = result.pop();
                 result.push(executeBiOp(op, table1, table2));
@@ -105,36 +116,60 @@ public class Engine {
 
     }
 
-    private Table executeUnaryOp(String operator2, Table para) throws Exception {
+    /**
+     * used to execute single variable predicate
+     *
+     * @param p_operator
+     * @param p_table    only one table needed
+     * @return
+     * @throws Exception
+     */
+    private Table executeUnaryOp(String p_operator, Table p_table) throws Exception {
         Table res = new Table("");
-        if (operator2.contains("@")) {
-            String columns = operator2.replaceAll("@","")
-                    .replaceAll("<","")
-                    .replaceAll(">","");
-            res = projectForAll(columns, para, Integer.toString(this.type));
-        } else if(operator2.contains("#")){
-            String conditions = operator2.replaceAll("#","");
-            conditions = conditions.substring(1,conditions.length() - 1);
+        if (p_operator.contains("@")) {
+            String columns = p_operator.replaceAll("@", "")
+                    .replaceAll("<", "")
+                    .replaceAll(">", "");
+            res = projectForAll(columns, p_table, Integer.toString(this.d_type));
+        } else if (p_operator.contains("#")) {
+            String conditions = p_operator.replaceAll("#", "");
+            conditions = conditions.substring(1, conditions.length() - 1);
 
-            res = selectForAll(conditions, para);
+            res = selectForAll(conditions, p_table);
         }
         return res;
     }
 
-    private Table executeBiOp(String operator2, Table para1, Table para2) throws Exception {
-        if (operator2.contains("*")){
-            return joinForAll(para1, para2,Integer.toString(this.type));
-        } else if (operator2.contains("+")){
-            return unionForAll(para1, para2, Integer.toString(this.type));
-        } else{
+    /**
+     * used to execute double variables predicate
+     *
+     * @param p_operator
+     * @param p_tableA   Table A
+     * @param p_tableB   Table B
+     * @return
+     * @throws Exception
+     */
+    private Table executeBiOp(String p_operator, Table p_tableA, Table p_tableB) throws Exception {
+        if (p_operator.contains("*")) {
+            return joinForAll(p_tableA, p_tableB, Integer.toString(this.d_type));
+        } else if (p_operator.contains("+")) {
+            return unionForAll(p_tableA, p_tableB, Integer.toString(this.d_type));
+        } else {
             return new Table("");
         }
     }
 
+    /**
+     * get rid of operator but return the table name from string of formula
+     *
+     * @param start   from where in strint to start find the table name
+     * @param formula
+     * @return
+     */
     private String getTableName(int start, String formula) {
         int end = -1;
-        for (int i = start ; i < formula.length() ; i ++){
-            if (formula.charAt(i) == ')'){
+        for (int i = start; i < formula.length(); i++) {
+            if (formula.charAt(i) == ')') {
                 end = i;
                 break;
             }
@@ -142,10 +177,17 @@ public class Engine {
         return formula.substring(start, end);
     }
 
+    /**
+     * get select string from formula
+     *
+     * @param start
+     * @param formula
+     * @return
+     */
     private String getProjectOrSelect(int start, String formula) {
         int end = -1;
-        for (int i = start + 1 ; i < formula.length() ; i ++){
-            if (formula.charAt(i) == '>' && formula.charAt(i + 1) == '('){
+        for (int i = start + 1; i < formula.length(); i++) {
+            if (formula.charAt(i) == '>' && formula.charAt(i + 1) == '(') {
                 end = i;
                 break;
             }
@@ -153,6 +195,12 @@ public class Engine {
         return formula.substring(start, end + 1);
     }
 
+    /**
+     * formula type form name to sign
+     *
+     * @param formula
+     * @return sign
+     */
     private String formate(String formula) {
         return formula.replaceAll("project", "@")
                 .replaceAll("select", "#")
@@ -160,302 +208,29 @@ public class Engine {
                 .replaceAll("union", "+");
     }
 
-        /*
-    operationType：
-    1 : bag
-    2 : probability
-    3 : certainty
-    4 : polynomial
-    5 : normal
-     */
 
-    public Table joinForAll(Table tableA, Table tableB, String operationType){
-
-        Table joinTable = new Table("joinTable");
-        joinTable.title.addAll(tableA.title);
-
-        HashMap<Integer, Integer> sameColumnLocationFromAToB = new HashMap<Integer, Integer>();
-        ArrayList<String> title = tableA.title;
-        for (int i = 0; i < title.size()-1; i++) {
-            String titleInA = title.get(i);
-            ArrayList<String> strings = tableB.title;
-            for (int i1 = 0; i1 < strings.size()-1; i1++) {
-                String titleInB = strings.get(i1);
-                if (titleInA.equals(titleInB)) {
-                    sameColumnLocationFromAToB.put(tableA.title.indexOf(titleInA), tableB.title.indexOf(titleInB));
-                }
-            }
-        }
-
-        ArrayList<Integer> locationColumnInBNotInA = new ArrayList<>();
-        joinTable.title.remove(joinTable.title.size()-1);
-        for (int i = 0; i < tableB.title.size(); i++) {
-            if(!tableA.title.contains(tableB.title.get(i))){
-                locationColumnInBNotInA.add(i);
-                joinTable.title.add(tableB.title.get(i));
-            }
-        }
-        joinTable.title.add("annotation");
-        joinTable.column = tableA.column+locationColumnInBNotInA.size();
-
-        for (ArrayList<String> lineInA:
-                tableA.content) {
-            for (ArrayList<String> lineInB:
-                    tableB.content) {
-                boolean rightnessFlag = true;
-                for (Integer columnLocationInA:
-                        sameColumnLocationFromAToB.keySet()) {
-                    if(!lineInA.get(columnLocationInA).equals(lineInB.get(sameColumnLocationFromAToB.get(columnLocationInA)))){
-                        rightnessFlag = false;
-                        break;
-                    }
-                }
-                if(rightnessFlag){
-                    ArrayList<String> newLine = new ArrayList<>();
-                    for (int i = 0; i < lineInA.size()-1; i++) {
-                        newLine.add(lineInA.get(i));
-                    }
-                    for (int location:
-                            locationColumnInBNotInA) {
-                        newLine.add(lineInB.get(location));
-                    }
-                    String newAnnotation = "";
-                    switch (operationType){
-                        case "1":
-                            newAnnotation = Integer.parseInt(lineInA.get(tableA.title.size()-1))*
-                                    Integer.parseInt(lineInB.get(tableB.title.size()-1))+
-                                    "";
-                            break;
-                        case "2":
-                            newAnnotation = Float.parseFloat(lineInA.get(tableA.title.size()-1))*
-                                    Float.parseFloat(lineInB.get(tableB.title.size()-1))+
-                                    "";
-                            break;
-                        case "3":
-                            newAnnotation = Math.min(Float.parseFloat(lineInA.get(tableA.title.size()-1)),
-                                    Float.parseFloat(lineInB.get(tableB.title.size()-1)))+
-                                    "";
-                            break;
-                        case "4":
-                            newAnnotation = lineInA.get(tableA.title.size()-1)+"*"+lineInB.get(tableB.title.size()-1);
-                            break;
-                        case "5":
-                            newAnnotation = Math.max(Integer.parseInt(lineInA.get(tableA.title.size()-1)),
-                                    Integer.parseInt(lineInB.get(tableB.title.size()-1)))+
-                                    "";
-                            break;
-                    }
-                    newLine.add(newAnnotation);
-                    joinTable.content.add(newLine);
-                }
-
-            }
-        }
-
-        return joinTable;
-    }
-
-    /*
-    operationType：
-    1 : bag
-    2 : probability
-    3 : certainty
-    4 : polynomial
-    5 : normal
-     */
-    public Table projectForAll(String columns, Table table,String operationType)throws Exception{
-
-        Table projectTable = new Table("projectTable");
-        String[] columnArr = columns.split(",");
-        String columnsAndannotation = columns+",annotation";
-        projectTable.createColumn(columnsAndannotation);
-
-        for (String column:
-                projectTable.title) {
-            if(!table.title.contains(column)){
-                throw new Exception("wrong project column");
-            }
-        }
-        ArrayList<ArrayList<String>> newContent = new ArrayList<ArrayList<String>>();
-        for (ArrayList<String> row:
-                table.content) {
-            ArrayList<String> newRow = new ArrayList<String>();
-            for (String column:
-                    projectTable.title) {
-                newRow.add(row.get(table.title.indexOf(column)));
-            }
-            boolean findNewAnnotation = false;
-            for (ArrayList<String> lineInNewContent:
-                 newContent) {
-                boolean findSameContentRow = true;
-                for (String s :
-                        columnArr) {
-                    if (!newRow.get(projectTable.title.indexOf(s)).equals(lineInNewContent.get(projectTable.title.indexOf(s)))) {
-                        findSameContentRow = false;
-                        break;
-                    }
-                }
-                if (findSameContentRow){
-                    String newAnnotation = "";
-                    switch (operationType){
-                        case "1":
-                            newAnnotation = Integer.parseInt(lineInNewContent.get(projectTable.title.size()-1))+
-                                    Integer.parseInt(newRow.get(projectTable.title.size()-1))+
-                                    "";
-                            break;
-                        case "2":
-                            newAnnotation = Float.parseFloat(lineInNewContent.get(projectTable.title.size()-1))+
-                                    Float.parseFloat(newRow.get(projectTable.title.size()-1))-
-                                    Float.parseFloat(lineInNewContent.get(projectTable.title.size()-1))*
-                                            Float.parseFloat(newRow.get(projectTable.title.size()-1))+
-                                    "";
-                            break;
-                        case "3":
-                            newAnnotation = Math.max(Float.parseFloat(lineInNewContent.get(projectTable.title.size()-1)),
-                                    Float.parseFloat(newRow.get(projectTable.title.size()-1)))+
-                                    "";
-                            break;
-                        case "4":
-                            newAnnotation = "("+
-                                    lineInNewContent.get(projectTable.title.size()-1)+
-                                    "+"+
-                                    newRow.get(projectTable.title.size()-1)+
-                                    ")";
-                            break;
-                        case "5":
-                            newAnnotation = Math.max(Integer.parseInt(lineInNewContent.get(projectTable.title.size()-1)),
-                                    Integer.parseInt(newRow.get(projectTable.title.size()-1)))+
-                                    "";
-                            break;
-                    }
-                    lineInNewContent.remove(projectTable.title.size()-1);
-                    lineInNewContent.add(newAnnotation);
-                    findNewAnnotation = true;
-                    break;
-                }
-            }
-            if(!findNewAnnotation){
-                newContent.add(newRow);
-            }
-
-        }
-        projectTable.content.addAll(newContent) ;
-        return projectTable;
-    }
-
-
-
-    /*
-    operationType：
-    1 : bag
-    2 : probability
-    3 : certainty
-    4 : polynomial
-    5 : normal
-     */
-
-    public Table unionForAll(Table tableA,Table tableB,String operationType) throws Exception{
-
-        if(tableA.title.size()!=tableB.title.size()){
-            throw new Exception("if two table union they must have same number of column");
-        }
-
-        for (String columnA:
-                tableA.title) {
-            if(!tableB.title.contains(columnA)){
-                throw new Exception("wrong union");
-            }
-        }
-
-        Table unionTable = new Table("unionTable");
-        ArrayList<ArrayList<String>> newTableOfTableAB = new ArrayList<ArrayList<String>>();
-        newTableOfTableAB.addAll(tableA.content);
-
-        HashMap<Integer,Integer> orderOfAMapToOrderOfB = new HashMap<Integer, Integer>();
-
-        for (int i = 0; i < tableA.title.size(); i++) {
-            orderOfAMapToOrderOfB.put(i,tableB.title.indexOf(tableA.title.get(i)));
-        }
-        for (ArrayList<String> lineInTableB:
-                tableB.content) {
-            ArrayList<String> newLine = new ArrayList<>();
-            for (int i = 0; i < tableB.title.size(); i++) {
-                newLine.add(lineInTableB.get(orderOfAMapToOrderOfB.get(i)));
-            }
-            boolean findNewAnnotation = false;
-            for (ArrayList<String> lineInTableA:
-                 tableA.content) {
-                boolean findSameRowInA = true;
-
-                for (int i = 0; i < tableA.title.size()-1; i++) {//one row each column
-                    if(!lineInTableA.get(i).equals(newLine.get(i))) {
-                        findSameRowInA = false;
-                        break;
-                    }
-                }
-                if (findSameRowInA){
-                    // calculate annotation
-                    String newAnnotation = "";
-                    switch (operationType){
-
-                        case "1":
-                            newAnnotation =Integer.parseInt(lineInTableA.get(tableA.title.size()-1))+
-                                    Integer.parseInt(newLine.get(tableA.title.size()-1))+"";
-                            break;
-                        case "2":
-                            newAnnotation =Float.parseFloat(lineInTableA.get(tableA.title.size()-1))+
-                                    Float.parseFloat(newLine.get(tableA.title.size()-1))-
-                                    Float.parseFloat(lineInTableA.get(tableA.title.size()-1))*
-                                            Float.parseFloat(newLine.get(tableA.title.size()-1))+
-                            "";
-                            break;
-                        case "3":
-                            newAnnotation = Math.max(Float.parseFloat(lineInTableA.get(tableA.title.size()-1)),Float.parseFloat(newLine.get(tableA.title.size()-1)))+"";
-                            break;
-                        case "4":
-                            newAnnotation = "("+
-                                    lineInTableA.get(tableA.title.size()-1)+
-                                    "+"+
-                                    newLine.get(tableA.title.size()-1)+
-                                    ")";
-                            break;
-                        case "5":
-                            newAnnotation = Math.max(Integer.parseInt(lineInTableA.get(tableA.title.size()-1)),Integer.parseInt(newLine.get(tableA.title.size()-1)))+"";
-                            break;
-
-
-                    }
-                    newTableOfTableAB.get(tableA.content.indexOf(lineInTableA)).remove(tableA.title.size()-1);
-                    newTableOfTableAB.get(tableA.content.indexOf(lineInTableA)).add(newAnnotation);
-
-                    findNewAnnotation = true;
-                    break;
-                }
-            }
-            if (!findNewAnnotation){
-                //add newline cannot find the duplicate row in tableA
-                newTableOfTableAB.add(newLine);
-            }
-        }
-        unionTable.column = tableA.column;
-        unionTable.title.addAll(tableA.title);
-        unionTable.content.addAll(newTableOfTableAB);
-        return unionTable;
-    }
 
     /*
     use =,!,<,>  the first is title after is the value, use "," to split each condition and use space" "to split title operator and value
     such as name = ABC,ID < 15
      */
-    public Table selectForAll(String conditions,Table table){
-        String[] separateConditions = conditions.split(",");
 
-        Table selectTable = new Table("selectTable");
-        selectTable.column = table.column;
-        selectTable.title = table.title;
+    /**
+     * select operation for table
+     *
+     * @param p_conditions SQL condition
+     * @param p_table selected table
+     * @return
+     */
+    public Table selectForAll(String p_conditions, Table p_table) {
+        String[] separateConditions = p_conditions.split(",");
 
-        for (ArrayList<String> eachLineInTable:
-             table.content) {
+        Table l_selectTable = new Table("selectTable");
+        l_selectTable.column = p_table.column;
+        l_selectTable.title = p_table.title;
+
+        for (ArrayList<String> eachLineInTable :
+                p_table.content) {
             boolean satisfyCondition = true;
 
             for (int i = 0; i < separateConditions.length; i++) {
@@ -464,42 +239,321 @@ public class Engine {
                 String operator = presentCondition[1];
                 String value = presentCondition[2];
 
-                int presentTitleLocation = table.title.indexOf(title);
+                int presentTitleLocation = p_table.title.indexOf(title);
 
-                switch (operator){
+                switch (operator) {
                     case "=":
-                        if(!eachLineInTable.get(presentTitleLocation).equals(value)){
+                        if (!eachLineInTable.get(presentTitleLocation).equals(value)) {
                             satisfyCondition = false;
                         }
                         break;
 
                     case "!":
-                        if(eachLineInTable.get(presentTitleLocation).equals(value)){
+                        if (eachLineInTable.get(presentTitleLocation).equals(value)) {
                             satisfyCondition = false;
                         }
                         break;
 
                     case ">":
-                        if(Integer.parseInt(eachLineInTable.get(presentTitleLocation))<=Integer.parseInt(value)){
+                        if (Integer.parseInt(eachLineInTable.get(presentTitleLocation)) <= Integer.parseInt(value)) {
                             satisfyCondition = false;
                         }
                         break;
 
                     case "<":
-                        if(Integer.parseInt(eachLineInTable.get(presentTitleLocation))>=Integer.parseInt(value)){
+                        if (Integer.parseInt(eachLineInTable.get(presentTitleLocation)) >= Integer.parseInt(value)) {
                             satisfyCondition = false;
                         }
                         break;
                 }
 
-                if(!satisfyCondition){
+                if (!satisfyCondition) {
                     break;
                 }
             }
-            if(satisfyCondition){
-                selectTable.content.add(eachLineInTable);
+            if (satisfyCondition) {
+                l_selectTable.content.add(eachLineInTable);
             }
         }
-        return selectTable;
+        return l_selectTable;
+    }
+
+
+
+    /**
+     * project operation
+     *
+     * @param p_columns
+     * @param p_table
+     * @param p_operationType 1 : bag 2 : probability  3 : certainty  4 : polynomial 5 : normal
+     * @return
+     * @throws Exception
+     */
+    public Table projectForAll(String p_columns, Table p_table, String p_operationType) throws Exception {
+
+        Table l_projectTable = new Table("projectTable");
+        String[] l_columnArr = p_columns.split(",");
+        String l_columnsAndannotation = p_columns + ",annotation";
+        l_projectTable.createColumn(l_columnsAndannotation);
+
+        for (String column :
+                l_projectTable.title) {
+            if (!p_table.title.contains(column)) {
+                throw new Exception("wrong project column");
+            }
+        }
+        ArrayList<ArrayList<String>> newContent = new ArrayList<ArrayList<String>>();
+        for (ArrayList<String> row : p_table.content) {
+            ArrayList<String> newRow = new ArrayList<String>();
+            for (String column : l_projectTable.title) {
+                newRow.add(row.get(p_table.title.indexOf(column)));
+            }
+            boolean findNewAnnotation = false;
+            for (ArrayList<String> lineInNewContent : newContent) {
+                boolean findSameContentRow = true;
+
+                // termination condition when alpha i is equal to alpha i+1
+                for (String s : l_columnArr) {
+                    if (!newRow.get(l_projectTable.title.indexOf(s)).equals(lineInNewContent.get(l_projectTable.title.indexOf(s)))) {
+                        findSameContentRow = false;
+                        break;
+                    }
+                }
+                if (findSameContentRow) {
+                    String newAnnotation = "";
+                    switch (p_operationType) {
+                        case "1":
+                            newAnnotation = Integer.parseInt(lineInNewContent.get(l_projectTable.title.size() - 1)) +
+                                    Integer.parseInt(newRow.get(l_projectTable.title.size() - 1)) +
+                                    "";
+                            break;
+                        case "2":
+                            newAnnotation = Float.parseFloat(lineInNewContent.get(l_projectTable.title.size() - 1)) +
+                                    Float.parseFloat(newRow.get(l_projectTable.title.size() - 1)) -
+                                    Float.parseFloat(lineInNewContent.get(l_projectTable.title.size() - 1)) *
+                                            Float.parseFloat(newRow.get(l_projectTable.title.size() - 1)) +
+                                    "";
+                            break;
+                        case "3":
+                            newAnnotation = Math.max(Float.parseFloat(lineInNewContent.get(l_projectTable.title.size() - 1)),
+                                    Float.parseFloat(newRow.get(l_projectTable.title.size() - 1))) +
+                                    "";
+                            break;
+                        case "4":
+                            newAnnotation = "(" +
+                                    lineInNewContent.get(l_projectTable.title.size() - 1) +
+                                    "+" +
+                                    newRow.get(l_projectTable.title.size() - 1) +
+                                    ")";
+                            break;
+                        case "5":
+                            newAnnotation = Math.max(Integer.parseInt(lineInNewContent.get(l_projectTable.title.size() - 1)),
+                                    Integer.parseInt(newRow.get(l_projectTable.title.size() - 1))) +
+                                    "";
+                            break;
+                    }
+                    lineInNewContent.remove(l_projectTable.title.size() - 1);
+                    lineInNewContent.add(newAnnotation);
+                    findNewAnnotation = true;
+                    break;
+                }
+            }
+            if (!findNewAnnotation) {
+                newContent.add(newRow);
+            }
+
+        }
+        l_projectTable.content.addAll(newContent);
+        return l_projectTable;
+    }
+
+
+    /**
+     * union two tables
+     *
+     * @param p_tableA
+     * @param p_tableB
+     * @param p_operationType 1 : bag 2 : probability  3 : certainty  4 : polynomial 5 : normal
+     * @return
+     * @throws Exception
+     */
+    public Table unionForAll(Table p_tableA, Table p_tableB, String p_operationType) throws Exception {
+
+        if (p_tableA.title.size() != p_tableB.title.size()) {
+            throw new Exception("ERROR: if two table union they must have same number of column");
+        }
+        // can't union same table
+        for (String columnA : p_tableA.title) {
+            if (!p_tableB.title.contains(columnA)) {
+                throw new Exception("ERROR: wrong union, can't self-union ");
+            }
+        }
+
+        Table l_unionTable = new Table("UnionTable");
+        ArrayList<ArrayList<String>> newTableOfTableAB = new ArrayList<ArrayList<String>>();
+        newTableOfTableAB.addAll(p_tableA.content);
+
+        HashMap<Integer, Integer> orderOfAMapToOrderOfB = new HashMap<Integer, Integer>();
+
+        for (int i = 0; i < p_tableA.title.size(); i++) {
+            orderOfAMapToOrderOfB.put(i, p_tableB.title.indexOf(p_tableA.title.get(i)));
+        }
+        for (ArrayList<String> lineInTableB :
+                p_tableB.content) {
+            ArrayList<String> newLine = new ArrayList<>();
+            for (int i = 0; i < p_tableB.title.size(); i++) {
+                newLine.add(lineInTableB.get(orderOfAMapToOrderOfB.get(i)));
+            }
+            boolean findNewAnnotation = false;
+            for (ArrayList<String> lineInTableA :
+                    p_tableA.content) {
+                boolean findSameRowInA = true;
+
+                for (int i = 0; i < p_tableA.title.size() - 1; i++) {//one row each column
+                    // termination condition
+                    if (!lineInTableA.get(i).equals(newLine.get(i))) {
+                        findSameRowInA = false;
+                        break;
+                    }
+                }
+                if (findSameRowInA) {
+                    // calculate annotation
+                    String newAnnotation = "";
+                    switch (p_operationType) {
+
+                        case "1":
+                            newAnnotation = Integer.parseInt(lineInTableA.get(p_tableA.title.size() - 1)) +
+                                    Integer.parseInt(newLine.get(p_tableA.title.size() - 1)) + "";
+                            break;
+                        case "2":
+                            newAnnotation = Float.parseFloat(lineInTableA.get(p_tableA.title.size() - 1)) +
+                                    Float.parseFloat(newLine.get(p_tableA.title.size() - 1)) -
+                                    Float.parseFloat(lineInTableA.get(p_tableA.title.size() - 1)) *
+                                            Float.parseFloat(newLine.get(p_tableA.title.size() - 1)) +
+                                    "";
+                            break;
+                        case "3":
+                            newAnnotation = Math.max(Float.parseFloat(lineInTableA.get(p_tableA.title.size() - 1)), Float.parseFloat(newLine.get(p_tableA.title.size() - 1))) + "";
+                            break;
+                        case "4":
+                            newAnnotation = "(" +
+                                    lineInTableA.get(p_tableA.title.size() - 1) +
+                                    "+" +
+                                    newLine.get(p_tableA.title.size() - 1) +
+                                    ")";
+                            break;
+                        case "5":
+                            newAnnotation = Math.max(Integer.parseInt(lineInTableA.get(p_tableA.title.size() - 1)), Integer.parseInt(newLine.get(p_tableA.title.size() - 1))) + "";
+                            break;
+
+
+                    }
+                    newTableOfTableAB.get(p_tableA.content.indexOf(lineInTableA)).remove(p_tableA.title.size() - 1);
+                    newTableOfTableAB.get(p_tableA.content.indexOf(lineInTableA)).add(newAnnotation);
+
+                    findNewAnnotation = true;
+                    break;
+                }
+            }
+            if (!findNewAnnotation) {
+                //add newline cannot find the duplicate row in tableA
+                newTableOfTableAB.add(newLine);
+            }
+        }
+        l_unionTable.column = p_tableA.column;
+        l_unionTable.title.addAll(p_tableA.title);
+        l_unionTable.content.addAll(newTableOfTableAB);
+        return l_unionTable;
+    }
+
+    /**
+     * join two tables
+     *
+     * @param p_tableA
+     * @param p_tableB
+     * @param p_operationType 1 : bag 2 : probability  3 : certainty  4 : polynomial 5 : normal
+     * @return jointable
+     */
+    public Table joinForAll(Table p_tableA, Table p_tableB, String p_operationType) {
+
+        Table l_joinTable = new Table("joinTable");
+        l_joinTable.title.addAll(p_tableA.title);
+
+        HashMap<Integer, Integer> sameColumnLocationFromAToB = new HashMap<Integer, Integer>();
+        ArrayList<String> title = p_tableA.title;
+        for (int i = 0; i < title.size() - 1; i++) {
+            String titleInA = title.get(i);
+            ArrayList<String> strings = p_tableB.title;
+            for (int i1 = 0; i1 < strings.size() - 1; i1++) {
+                String titleInB = strings.get(i1);
+                if (titleInA.equals(titleInB)) {
+                    sameColumnLocationFromAToB.put(p_tableA.title.indexOf(titleInA), p_tableB.title.indexOf(titleInB));
+                }
+            }
+        }
+
+        ArrayList<Integer> locationColumnInBNotInA = new ArrayList<>();
+        l_joinTable.title.remove(l_joinTable.title.size() - 1);
+        for (int i = 0; i < p_tableB.title.size(); i++) {
+            if (!p_tableA.title.contains(p_tableB.title.get(i))) {
+                locationColumnInBNotInA.add(i);
+                l_joinTable.title.add(p_tableB.title.get(i));
+            }
+        }
+        l_joinTable.title.add("annotation");
+        l_joinTable.column = p_tableA.column + locationColumnInBNotInA.size();
+
+        for (ArrayList<String> lineInA : p_tableA.content) {
+            for (ArrayList<String> lineInB : p_tableB.content) {
+                boolean rightnessFlag = true;
+                for (Integer columnLocationInA : sameColumnLocationFromAToB.keySet()) {
+                    // termination condition
+                    if (!lineInA.get(columnLocationInA).equals(lineInB.get(sameColumnLocationFromAToB.get(columnLocationInA)))) {
+                        rightnessFlag = false;
+                        break;
+                    }
+                }
+                if (rightnessFlag) {
+                    ArrayList<String> newLine = new ArrayList<>();
+                    for (int i = 0; i < lineInA.size() - 1; i++) {
+                        newLine.add(lineInA.get(i));
+                    }
+                    for (int location : locationColumnInBNotInA) {
+                        newLine.add(lineInB.get(location));
+                    }
+                    String newAnnotation = "";
+                    switch (p_operationType) {
+                        case "1":
+                            newAnnotation = Integer.parseInt(lineInA.get(p_tableA.title.size() - 1)) *
+                                    Integer.parseInt(lineInB.get(p_tableB.title.size() - 1)) +
+                                    "";
+                            break;
+                        case "2":
+                            newAnnotation = Float.parseFloat(lineInA.get(p_tableA.title.size() - 1)) *
+                                    Float.parseFloat(lineInB.get(p_tableB.title.size() - 1)) +
+                                    "";
+                            break;
+                        case "3":
+                            newAnnotation = Math.min(Float.parseFloat(lineInA.get(p_tableA.title.size() - 1)),
+                                    Float.parseFloat(lineInB.get(p_tableB.title.size() - 1))) +
+                                    "";
+                            break;
+                        case "4":
+                            newAnnotation = lineInA.get(p_tableA.title.size() - 1) + "*" + lineInB.get(p_tableB.title.size() - 1);
+                            break;
+                        case "5":
+                            newAnnotation = Math.max(Integer.parseInt(lineInA.get(p_tableA.title.size() - 1)),
+                                    Integer.parseInt(lineInB.get(p_tableB.title.size() - 1))) +
+                                    "";
+                            break;
+                    }
+                    newLine.add(newAnnotation);
+                    l_joinTable.content.add(newLine);
+                }
+            }
+        }
+        return l_joinTable;
     }
 }
+
+
