@@ -297,7 +297,7 @@ public class Engine {
 
         for (String column : l_projectTable.title) {
             if (!p_table.title.contains(column)) {
-                throw new Exception("ERROR: wrong project column");
+                System.out.println("ERROR: wrong project column");
             }
         }
         ArrayList<ArrayList<String>> newContent = new ArrayList<ArrayList<String>>();
