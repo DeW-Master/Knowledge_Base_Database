@@ -1,3 +1,5 @@
+package Table;
+
 import DataBase.DataBase;
 import Table.Table;
 
@@ -225,7 +227,7 @@ public class Engine {
     public Table selectForAll(String p_conditions, Table p_table) {
         String[] separateConditions = p_conditions.split(",");
 
-        Table l_selectTable = new Table("selectTable");
+        Table l_selectTable = new Table("Select Table");
         l_selectTable.d_columnCounter = p_table.d_columnCounter;
         l_selectTable.d_title = p_table.d_title;
 
@@ -240,32 +242,19 @@ public class Engine {
 
                 int presentTitleLocation = p_table.d_title.indexOf(title);
 
-                switch (operator) {
-                    case "=":
-                        if (!eachLineInTable.get(presentTitleLocation).equals(value)) {
-                            satisfyCondition = false;
-                        }
-                        break;
-
-                    case "!":
-                        if (eachLineInTable.get(presentTitleLocation).equals(value)) {
-                            satisfyCondition = false;
-                        }
-                        break;
-
-                    case ">":
-                        if (Integer.parseInt(eachLineInTable.get(presentTitleLocation)) <= Integer.parseInt(value)) {
-                            satisfyCondition = false;
-                        }
-                        break;
-
-                    case "<":
-                        if (Integer.parseInt(eachLineInTable.get(presentTitleLocation)) >= Integer.parseInt(value)) {
-                            satisfyCondition = false;
-                        }
-                        break;
+                if(operator.equals("=") || operator.equals("!")){
+                    if (eachLineInTable.get(presentTitleLocation).equals(value)) {
+                        satisfyCondition = false;
+                    }
+                }else if (operator.equals(">")){
+                    if (Integer.parseInt(eachLineInTable.get(presentTitleLocation)) <= Integer.parseInt(value)) {
+                        satisfyCondition = false;
+                    }
+                }else if(operator.equals("<")){
+                    if (Integer.parseInt(eachLineInTable.get(presentTitleLocation)) >= Integer.parseInt(value)) {
+                        satisfyCondition = false;
+                    }
                 }
-
                 if (!satisfyCondition) {
                     break;
                 }
@@ -290,9 +279,9 @@ public class Engine {
      */
     public Table projectForAll(String p_columns, Table p_table, String p_operationType) throws Exception {
 
-        Table l_projectTable = new Table("projectTable");
+        Table l_projectTable = new Table("Project Table");
         String[] l_columnArr = p_columns.split(",");
-        String l_columnsAndannotation = p_columns + ",annotation";
+        String l_columnsAndannotation = p_columns + ",a nnotation";
         l_projectTable.createColumn(l_columnsAndannotation);
 
         for (String column : l_projectTable.d_title) {

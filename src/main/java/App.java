@@ -32,7 +32,6 @@ public class App {
             try {
                 Table res = l_annoEngine.executeQuery(query);
                 System.out.println(res);
-//                res.print();
             } catch (Exception e) {
                 e.printStackTrace();
             }
