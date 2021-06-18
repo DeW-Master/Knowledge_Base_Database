@@ -10,8 +10,11 @@ project<X,Y>(Q)
 Query 4 for certainty
 project<X,Z>((project<X,Y>(P) join project<Y,Z>(P)) union (project<X,Z>(P) join project<Y,Z>(P)))
 
-Query 5 for SQL
-project<X,Y>(Q)
+Query 5 for polynomial
+project<A,C>((project<A,B>(R) join project<B,C>(R)) union (project<A,C>(R) join project<B,C>(R)))
 
 Query 6 for SQL
+project<X,Y>(Q)
+
+Query 7 for SQL
 select<doc_id = 1>(Clinique.Record)
