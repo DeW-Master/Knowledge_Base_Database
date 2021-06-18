@@ -15,5 +15,6 @@ project<X,Y>(Q)
 
 Query 6 for SQL
 select<doc_id = 1>(Clinique.Record)
+
 Query 7 for Polynomial:
 project<X,Z>((project<X,Y>(R) join project<Y,Z>(R)) union (project<X,Z>(R) join project<Y,Z>(R)))

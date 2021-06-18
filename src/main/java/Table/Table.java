@@ -25,10 +25,7 @@ public class Table {
      * column counter
      */
     public int d_columnCounter;
-    /**
-     * to limit the column size
-     */
-    public static int[] columnMaxLengths = new int[20];
+
 
     /**
      * table constructor
@@ -47,7 +44,6 @@ public class Table {
         this.d_columnCounter = columnName.length;
         for (int i = 0; i < d_columnCounter; i++) {
             columnName[i] = columnName[i].replaceAll("\\s", "");
-            columnMaxLengths[i] = columnName[i].length();
             this.d_title.add(columnName[i]);
         }
     }
@@ -61,7 +57,6 @@ public class Table {
         ArrayList<String> row = new ArrayList<>();
         for (int i = 0; i < d_columnCounter; i++) {
             records[i] = records[i].replaceAll("\\s", "");
-            columnMaxLengths[i] = Math.max(columnMaxLengths[i], records[i].length());
             row.add(records[i]);
         }
         d_contentTable.add(row);
@@ -84,28 +79,6 @@ public class Table {
         return formatAsTable(rows);
     }
 
-    /**
-     * table print method
-     */
-    public void print() {
-        //title
-        System.out.println("---------------" + d_tableName.toUpperCase() + "---------------");
-        //columnName
-        for (int i = 0; i < d_columnCounter; i++) {
-            System.out.printf("%" + (columnMaxLengths[i] + 2) + "s", d_title.get(i)+"\t");
-        }
-        System.out.println();
-        //content
-        Iterator<ArrayList<String>> iterator = d_contentTable.iterator();
-        ArrayList<String> row;
-        while (iterator.hasNext()) {
-            row = iterator.next();
-            for (int i = 0; i < d_columnCounter; i++) {
-                System.out.printf("%" + (columnMaxLengths[i] + 2) + "s", row.get(i)+"\t");
-            }
-            System.out.println();
-        }
-    }
 
     /**
      * table output format function
