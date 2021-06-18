@@ -18,3 +18,12 @@ select<doc_id = 1>(Clinique.Record)
 
 Query 7 for Polynomial:
 project<X,Z>((project<X,Y>(R) join project<Y,Z>(R)) union (project<X,Z>(R) join project<Y,Z>(R)))
+
+Query 8 for Bag:
+project<first_name,medical_record>(Clinique.Record)
+
+Query 9 for SQL
+select<medical_record = 'covid-19'>(Clinique.Record)
+
+Query 10 for SQL
+select<patient_id < 6>(Clinique.Record)
