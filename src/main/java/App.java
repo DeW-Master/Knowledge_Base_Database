@@ -23,7 +23,7 @@ public class App {
             System.out.println("||2.probability            ||");
             System.out.println("||3.certainty              ||");
             System.out.println("||4.polynomial             ||");
-            System.out.println("||5.normal output(SQL ver) ||");
+            System.out.println("||5.SQL                    ||");
 
             String type = s.nextLine();
             if (query.equals("exit"))
