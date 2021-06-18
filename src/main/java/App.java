@@ -31,7 +31,8 @@ public class App {
             Engine l_annoEngine = new Engine(Integer.valueOf(type), dataBase);
             try {
                 Table res = l_annoEngine.executeQuery(query);
-                res.print();
+                System.out.println(res);
+//                res.print();
             } catch (Exception e) {
                 e.printStackTrace();
             }

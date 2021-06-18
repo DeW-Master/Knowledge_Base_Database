@@ -2,6 +2,7 @@ package Table;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * the panda like dataframe, use for control annotation and datbase
@@ -11,67 +12,130 @@ public class Table {
     /**
      * table name
      */
-    public String name;
+    public String d_tableName;
     /**
      * column name
      */
-    public ArrayList<String> title = new ArrayList<>();
+    public ArrayList<String> d_title = new ArrayList<>();
     /**
      * 2D matrix for store data
      */
-    public ArrayList<ArrayList<String>> content = new ArrayList<>();
+    public ArrayList<ArrayList<String>> d_contentTable = new ArrayList<>();
     /**
      * column counter
      */
-    public int column;
+    public int d_columnCounter;
     /**
      * to limit the column size
      */
     public static int[] columnMaxLengths = new int[20];
 
+    /**
+     * table constructor
+     * @param name need table name
+     */
     public Table(String name) {
-        this.name = name;
+        this.d_tableName = name;
     }
 
-    public void createColumn(String str) {
-        String[] columnName = str.split(",");
-        this.column = columnName.length;
-        for (int i = 0; i < column; i++) {
+    /**
+     * create new column in table by input column name
+     * @param p_newColumnName
+     */
+    public void createColumn(String p_newColumnName) {
+        String[] columnName = p_newColumnName.split(",");
+        this.d_columnCounter = columnName.length;
+        for (int i = 0; i < d_columnCounter; i++) {
             columnName[i] = columnName[i].replaceAll("\\s", "");
             columnMaxLengths[i] = columnName[i].length();
-            this.title.add(columnName[i]);
+            this.d_title.add(columnName[i]);
         }
     }
 
-    public void addRow(String str) {
-        String[] records = str.split(",");
+    /**
+     * by input string to add new row in table
+     * @param p_newRowStr
+     */
+    public void addRow(String p_newRowStr) {
+        String[] records = p_newRowStr.split(",");
         ArrayList<String> row = new ArrayList<>();
-        for (int i = 0; i < column; i++) {
+        for (int i = 0; i < d_columnCounter; i++) {
             records[i] = records[i].replaceAll("\\s", "");
             columnMaxLengths[i] = Math.max(columnMaxLengths[i], records[i].length());
             row.add(records[i]);
         }
-        content.add(row);
+        d_contentTable.add(row);
     }
 
 
+    /**
+     * class toString method override
+     * @return table string output
+     */
+    @Override
+    public String toString(){
+        //title
+        System.out.println("---------------" + d_tableName.toUpperCase() + "---------------");
+        List<List<String>> rows = new ArrayList<>();
+        rows.add(d_title);
+        for(ArrayList<String> row : d_contentTable){
+            rows.add(row);
+        }
+        return formatAsTable(rows);
+    }
+
+    /**
+     * table print method
+     */
     public void print() {
         //title
-        System.out.println("---------------" + name + "---------------");
+        System.out.println("---------------" + d_tableName.toUpperCase() + "---------------");
         //columnName
-        for (int i = 0; i < column; i++) {
-            System.out.printf("%" + (columnMaxLengths[i] + 2) + "s", title.get(i));
+        for (int i = 0; i < d_columnCounter; i++) {
+            System.out.printf("%" + (columnMaxLengths[i] + 2) + "s", d_title.get(i)+"\t");
         }
         System.out.println();
         //content
-        Iterator<ArrayList<String>> iterator = content.iterator();
-        ArrayList<String> row = new ArrayList<>();
+        Iterator<ArrayList<String>> iterator = d_contentTable.iterator();
+        ArrayList<String> row;
         while (iterator.hasNext()) {
             row = iterator.next();
-            for (int i = 0; i < column; i++) {
-                System.out.printf("%" + (columnMaxLengths[i] + 2) + "s", row.get(i));
+            for (int i = 0; i < d_columnCounter; i++) {
+                System.out.printf("%" + (columnMaxLengths[i] + 2) + "s", row.get(i)+"\t");
             }
             System.out.println();
         }
     }
+
+    /**
+     * table output format function
+     * @param p_rawTable
+     * @return
+     */
+    public static String formatAsTable(List<List<String>> p_rawTable)
+    {
+        int[] maxLengths = new int[p_rawTable.get(0).size()];
+        for (List<String> row : p_rawTable)
+        {
+            for (int i = 0; i < row.size(); i++)
+            {
+                maxLengths[i] = Math.max(maxLengths[i], row.get(i).length());
+            }
+        }
+
+        StringBuilder formatBuilder = new StringBuilder();
+        for (int maxLength : maxLengths)
+        {
+            formatBuilder.append("%-").append(maxLength + 2).append("s");
+        }
+        String format = formatBuilder.toString();
+
+        StringBuilder l_formattedTable = new StringBuilder();
+        for (List<String> row : p_rawTable)
+        {
+            l_formattedTable.append(String.format(format, row.toArray(new String[0]))).append("\n");
+        }
+        return l_formattedTable.toString();
+    }
+
 }

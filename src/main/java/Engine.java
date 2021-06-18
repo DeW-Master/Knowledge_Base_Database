@@ -226,10 +226,10 @@ public class Engine {
         String[] separateConditions = p_conditions.split(",");
 
         Table l_selectTable = new Table("selectTable");
-        l_selectTable.column = p_table.column;
-        l_selectTable.title = p_table.title;
+        l_selectTable.d_columnCounter = p_table.d_columnCounter;
+        l_selectTable.d_title = p_table.d_title;
 
-        for (ArrayList<String> eachLineInTable : p_table.content) {
+        for (ArrayList<String> eachLineInTable : p_table.d_contentTable) {
             boolean satisfyCondition = true;
 
             for (int i = 0; i < separateConditions.length; i++) {
@@ -238,7 +238,7 @@ public class Engine {
                 String operator = presentCondition[1];
                 String value = presentCondition[2];
 
-                int presentTitleLocation = p_table.title.indexOf(title);
+                int presentTitleLocation = p_table.d_title.indexOf(title);
 
                 switch (operator) {
                     case "=":
@@ -271,7 +271,7 @@ public class Engine {
                 }
             }
             if (satisfyCondition) {
-                l_selectTable.content.add(eachLineInTable);
+                l_selectTable.d_contentTable.add(eachLineInTable);
             }
         }
         return l_selectTable;
@@ -295,16 +295,16 @@ public class Engine {
         String l_columnsAndannotation = p_columns + ",annotation";
         l_projectTable.createColumn(l_columnsAndannotation);
 
-        for (String column : l_projectTable.title) {
-            if (!p_table.title.contains(column)) {
+        for (String column : l_projectTable.d_title) {
+            if (!p_table.d_title.contains(column)) {
                 System.out.println("ERROR: wrong project column");
             }
         }
         ArrayList<ArrayList<String>> newContent = new ArrayList<ArrayList<String>>();
-        for (ArrayList<String> row : p_table.content) {
+        for (ArrayList<String> row : p_table.d_contentTable) {
             ArrayList<String> newRow = new ArrayList<String>();
-            for (String column : l_projectTable.title) {
-                newRow.add(row.get(p_table.title.indexOf(column)));
+            for (String column : l_projectTable.d_title) {
+                newRow.add(row.get(p_table.d_title.indexOf(column)));
             }
             boolean findNewAnnotation = false;
             for (ArrayList<String> lineInNewContent : newContent) {
@@ -312,7 +312,7 @@ public class Engine {
 
                 // termination condition when alpha i is equal to alpha i+1
                 for (String s : l_columnArr) {
-                    if (!newRow.get(l_projectTable.title.indexOf(s)).equals(lineInNewContent.get(l_projectTable.title.indexOf(s)))) {
+                    if (!newRow.get(l_projectTable.d_title.indexOf(s)).equals(lineInNewContent.get(l_projectTable.d_title.indexOf(s)))) {
                         findSameContentRow = false;
                         break;
                     }
@@ -321,36 +321,36 @@ public class Engine {
                     String newAnnotation = "";
                     switch (p_operationType) {
                         case "1":
-                            newAnnotation = Integer.parseInt(lineInNewContent.get(l_projectTable.title.size() - 1)) +
-                                    Integer.parseInt(newRow.get(l_projectTable.title.size() - 1)) +
+                            newAnnotation = Integer.parseInt(lineInNewContent.get(l_projectTable.d_title.size() - 1)) +
+                                    Integer.parseInt(newRow.get(l_projectTable.d_title.size() - 1)) +
                                     "";
                             break;
                         case "2":
-                            newAnnotation = Float.parseFloat(lineInNewContent.get(l_projectTable.title.size() - 1)) +
-                                    Float.parseFloat(newRow.get(l_projectTable.title.size() - 1)) -
-                                    Float.parseFloat(lineInNewContent.get(l_projectTable.title.size() - 1)) *
-                                            Float.parseFloat(newRow.get(l_projectTable.title.size() - 1)) +
+                            newAnnotation = Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)) +
+                                    Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1)) -
+                                    Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)) *
+                                            Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1)) +
                                     "";
                             break;
                         case "3":
-                            newAnnotation = Math.max(Float.parseFloat(lineInNewContent.get(l_projectTable.title.size() - 1)),
-                                    Float.parseFloat(newRow.get(l_projectTable.title.size() - 1))) +
+                            newAnnotation = Math.max(Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)),
+                                    Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1))) +
                                     "";
                             break;
                         case "4":
                             newAnnotation = "(" +
-                                    lineInNewContent.get(l_projectTable.title.size() - 1) +
+                                    lineInNewContent.get(l_projectTable.d_title.size() - 1) +
                                     "+" +
-                                    newRow.get(l_projectTable.title.size() - 1) +
+                                    newRow.get(l_projectTable.d_title.size() - 1) +
                                     ")";
                             break;
                         case "5":
-                            newAnnotation = Math.max(Integer.parseInt(lineInNewContent.get(l_projectTable.title.size() - 1)),
-                                    Integer.parseInt(newRow.get(l_projectTable.title.size() - 1))) +
+                            newAnnotation = Math.max(Integer.parseInt(lineInNewContent.get(l_projectTable.d_title.size() - 1)),
+                                    Integer.parseInt(newRow.get(l_projectTable.d_title.size() - 1))) +
                                     "";
                             break;
                     }
-                    lineInNewContent.remove(l_projectTable.title.size() - 1);
+                    lineInNewContent.remove(l_projectTable.d_title.size() - 1);
                     lineInNewContent.add(newAnnotation);
                     findNewAnnotation = true;
                     break;
@@ -361,7 +361,7 @@ public class Engine {
             }
 
         }
-        l_projectTable.content.addAll(newContent);
+        l_projectTable.d_contentTable.addAll(newContent);
         return l_projectTable;
     }
 
@@ -377,37 +377,37 @@ public class Engine {
      */
     public Table unionForAll(Table p_tableA, Table p_tableB, String p_operationType) throws Exception {
 
-        if (p_tableA.title.size() != p_tableB.title.size()) {
+        if (p_tableA.d_title.size() != p_tableB.d_title.size()) {
             throw new Exception("ERROR: if two table union they must have same number of column");
         }
         // can't union same table
-        for (String columnA : p_tableA.title) {
-            if (!p_tableB.title.contains(columnA)) {
+        for (String columnA : p_tableA.d_title) {
+            if (!p_tableB.d_title.contains(columnA)) {
                 throw new Exception("ERROR: wrong union, can't self-union ");
             }
         }
 
         Table l_unionTable = new Table("UnionTable");
         ArrayList<ArrayList<String>> newTableOfTableAB = new ArrayList<ArrayList<String>>();
-        newTableOfTableAB.addAll(p_tableA.content);
+        newTableOfTableAB.addAll(p_tableA.d_contentTable);
 
         HashMap<Integer, Integer> orderOfAMapToOrderOfB = new HashMap<Integer, Integer>();
 
-        for (int i = 0; i < p_tableA.title.size(); i++) {
-            orderOfAMapToOrderOfB.put(i, p_tableB.title.indexOf(p_tableA.title.get(i)));
+        for (int i = 0; i < p_tableA.d_title.size(); i++) {
+            orderOfAMapToOrderOfB.put(i, p_tableB.d_title.indexOf(p_tableA.d_title.get(i)));
         }
         for (ArrayList<String> lineInTableB :
-                p_tableB.content) {
+                p_tableB.d_contentTable) {
             ArrayList<String> newLine = new ArrayList<>();
-            for (int i = 0; i < p_tableB.title.size(); i++) {
+            for (int i = 0; i < p_tableB.d_title.size(); i++) {
                 newLine.add(lineInTableB.get(orderOfAMapToOrderOfB.get(i)));
             }
             boolean findNewAnnotation = false;
             for (ArrayList<String> lineInTableA :
-                    p_tableA.content) {
+                    p_tableA.d_contentTable) {
                 boolean findSameRowInA = true;
 
-                for (int i = 0; i < p_tableA.title.size() - 1; i++) {//one row each column
+                for (int i = 0; i < p_tableA.d_title.size() - 1; i++) {//one row each column
                     // termination condition
                     if (!lineInTableA.get(i).equals(newLine.get(i))) {
                         findSameRowInA = false;
@@ -420,34 +420,34 @@ public class Engine {
                     switch (p_operationType) {
 
                         case "1":
-                            newAnnotation = Integer.parseInt(lineInTableA.get(p_tableA.title.size() - 1)) +
-                                    Integer.parseInt(newLine.get(p_tableA.title.size() - 1)) + "";
+                            newAnnotation = Integer.parseInt(lineInTableA.get(p_tableA.d_title.size() - 1)) +
+                                    Integer.parseInt(newLine.get(p_tableA.d_title.size() - 1)) + "";
                             break;
                         case "2":
-                            newAnnotation = Float.parseFloat(lineInTableA.get(p_tableA.title.size() - 1)) +
-                                    Float.parseFloat(newLine.get(p_tableA.title.size() - 1)) -
-                                    Float.parseFloat(lineInTableA.get(p_tableA.title.size() - 1)) *
-                                            Float.parseFloat(newLine.get(p_tableA.title.size() - 1)) +
+                            newAnnotation = Float.parseFloat(lineInTableA.get(p_tableA.d_title.size() - 1)) +
+                                    Float.parseFloat(newLine.get(p_tableA.d_title.size() - 1)) -
+                                    Float.parseFloat(lineInTableA.get(p_tableA.d_title.size() - 1)) *
+                                            Float.parseFloat(newLine.get(p_tableA.d_title.size() - 1)) +
                                     "";
                             break;
                         case "3":
-                            newAnnotation = Math.max(Float.parseFloat(lineInTableA.get(p_tableA.title.size() - 1)), Float.parseFloat(newLine.get(p_tableA.title.size() - 1))) + "";
+                            newAnnotation = Math.max(Float.parseFloat(lineInTableA.get(p_tableA.d_title.size() - 1)), Float.parseFloat(newLine.get(p_tableA.d_title.size() - 1))) + "";
                             break;
                         case "4":
                             newAnnotation = "(" +
-                                    lineInTableA.get(p_tableA.title.size() - 1) +
+                                    lineInTableA.get(p_tableA.d_title.size() - 1) +
                                     "+" +
-                                    newLine.get(p_tableA.title.size() - 1) +
+                                    newLine.get(p_tableA.d_title.size() - 1) +
                                     ")";
                             break;
                         case "5":
-                            newAnnotation = Math.max(Integer.parseInt(lineInTableA.get(p_tableA.title.size() - 1)), Integer.parseInt(newLine.get(p_tableA.title.size() - 1))) + "";
+                            newAnnotation = Math.max(Integer.parseInt(lineInTableA.get(p_tableA.d_title.size() - 1)), Integer.parseInt(newLine.get(p_tableA.d_title.size() - 1))) + "";
                             break;
 
 
                     }
-                    newTableOfTableAB.get(p_tableA.content.indexOf(lineInTableA)).remove(p_tableA.title.size() - 1);
-                    newTableOfTableAB.get(p_tableA.content.indexOf(lineInTableA)).add(newAnnotation);
+                    newTableOfTableAB.get(p_tableA.d_contentTable.indexOf(lineInTableA)).remove(p_tableA.d_title.size() - 1);
+                    newTableOfTableAB.get(p_tableA.d_contentTable.indexOf(lineInTableA)).add(newAnnotation);
 
                     findNewAnnotation = true;
                     break;
@@ -458,9 +458,9 @@ public class Engine {
                 newTableOfTableAB.add(newLine);
             }
         }
-        l_unionTable.column = p_tableA.column;
-        l_unionTable.title.addAll(p_tableA.title);
-        l_unionTable.content.addAll(newTableOfTableAB);
+        l_unionTable.d_columnCounter = p_tableA.d_columnCounter;
+        l_unionTable.d_title.addAll(p_tableA.d_title);
+        l_unionTable.d_contentTable.addAll(newTableOfTableAB);
         return l_unionTable;
     }
 
@@ -475,34 +475,34 @@ public class Engine {
     public Table joinForAll(Table p_tableA, Table p_tableB, String p_operationType) {
 
         Table l_joinTable = new Table("joinTable");
-        l_joinTable.title.addAll(p_tableA.title);
+        l_joinTable.d_title.addAll(p_tableA.d_title);
 
         HashMap<Integer, Integer> sameColumnLocationFromAToB = new HashMap<Integer, Integer>();
-        ArrayList<String> title = p_tableA.title;
+        ArrayList<String> title = p_tableA.d_title;
         for (int i = 0; i < title.size() - 1; i++) {
             String titleInA = title.get(i);
-            ArrayList<String> strings = p_tableB.title;
+            ArrayList<String> strings = p_tableB.d_title;
             for (int i1 = 0; i1 < strings.size() - 1; i1++) {
                 String titleInB = strings.get(i1);
                 if (titleInA.equals(titleInB)) {
-                    sameColumnLocationFromAToB.put(p_tableA.title.indexOf(titleInA), p_tableB.title.indexOf(titleInB));
+                    sameColumnLocationFromAToB.put(p_tableA.d_title.indexOf(titleInA), p_tableB.d_title.indexOf(titleInB));
                 }
             }
         }
 
         ArrayList<Integer> locationColumnInBNotInA = new ArrayList<>();
-        l_joinTable.title.remove(l_joinTable.title.size() - 1);
-        for (int i = 0; i < p_tableB.title.size(); i++) {
-            if (!p_tableA.title.contains(p_tableB.title.get(i))) {
+        l_joinTable.d_title.remove(l_joinTable.d_title.size() - 1);
+        for (int i = 0; i < p_tableB.d_title.size(); i++) {
+            if (!p_tableA.d_title.contains(p_tableB.d_title.get(i))) {
                 locationColumnInBNotInA.add(i);
-                l_joinTable.title.add(p_tableB.title.get(i));
+                l_joinTable.d_title.add(p_tableB.d_title.get(i));
             }
         }
-        l_joinTable.title.add("annotation");
-        l_joinTable.column = p_tableA.column + locationColumnInBNotInA.size();
+        l_joinTable.d_title.add("annotation");
+        l_joinTable.d_columnCounter = p_tableA.d_columnCounter + locationColumnInBNotInA.size();
 
-        for (ArrayList<String> lineInA : p_tableA.content) {
-            for (ArrayList<String> lineInB : p_tableB.content) {
+        for (ArrayList<String> lineInA : p_tableA.d_contentTable) {
+            for (ArrayList<String> lineInB : p_tableB.d_contentTable) {
                 boolean rightnessFlag = true;
                 for (Integer columnLocationInA : sameColumnLocationFromAToB.keySet()) {
                     // termination condition
@@ -522,31 +522,31 @@ public class Engine {
                     String newAnnotation = "";
                     switch (p_operationType) {
                         case "1":
-                            newAnnotation = Integer.parseInt(lineInA.get(p_tableA.title.size() - 1)) *
-                                    Integer.parseInt(lineInB.get(p_tableB.title.size() - 1)) +
+                            newAnnotation = Integer.parseInt(lineInA.get(p_tableA.d_title.size() - 1)) *
+                                    Integer.parseInt(lineInB.get(p_tableB.d_title.size() - 1)) +
                                     "";
                             break;
                         case "2":
-                            newAnnotation = Float.parseFloat(lineInA.get(p_tableA.title.size() - 1)) *
-                                    Float.parseFloat(lineInB.get(p_tableB.title.size() - 1)) +
+                            newAnnotation = Float.parseFloat(lineInA.get(p_tableA.d_title.size() - 1)) *
+                                    Float.parseFloat(lineInB.get(p_tableB.d_title.size() - 1)) +
                                     "";
                             break;
                         case "3":
-                            newAnnotation = Math.min(Float.parseFloat(lineInA.get(p_tableA.title.size() - 1)),
-                                    Float.parseFloat(lineInB.get(p_tableB.title.size() - 1))) +
+                            newAnnotation = Math.min(Float.parseFloat(lineInA.get(p_tableA.d_title.size() - 1)),
+                                    Float.parseFloat(lineInB.get(p_tableB.d_title.size() - 1))) +
                                     "";
                             break;
                         case "4":
-                            newAnnotation = lineInA.get(p_tableA.title.size() - 1) + "*" + lineInB.get(p_tableB.title.size() - 1);
+                            newAnnotation = lineInA.get(p_tableA.d_title.size() - 1) + "*" + lineInB.get(p_tableB.d_title.size() - 1);
                             break;
                         case "5":
-                            newAnnotation = Math.max(Integer.parseInt(lineInA.get(p_tableA.title.size() - 1)),
-                                    Integer.parseInt(lineInB.get(p_tableB.title.size() - 1))) +
+                            newAnnotation = Math.max(Integer.parseInt(lineInA.get(p_tableA.d_title.size() - 1)),
+                                    Integer.parseInt(lineInB.get(p_tableB.d_title.size() - 1))) +
                                     "";
                             break;
                     }
                     newLine.add(newAnnotation);
-                    l_joinTable.content.add(newLine);
+                    l_joinTable.d_contentTable.add(newLine);
                 }
             }
         }
