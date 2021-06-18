@@ -4,13 +4,14 @@ project<patient_id,first_name>(Clinique.Record)
 Query 2 for Bag and probability:
 project<X,Z>((project<X,Y>(simpleRelation) join project<Y,Z>(simpleRelation)) union (project<X,Z>(simpleRelation) join project<Y,Z>(simpleRelation)))
 
-Query 4 for Polynomial:
-project<X,Z>((project<X,Y>(PolynomialRelation) join project<Y,Z>(PolynomialRelation)) union (project<X,Z>(PolynomialRelation) join project<Y,Z>(PolynomialRelation)))
 Query 3 for certainty
 project<X,Y>(Q)
+
 Query 4 for certainty
 project<X,Z>((project<X,Y>(P) join project<Y,Z>(P)) union (project<X,Z>(P) join project<Y,Z>(P)))
+
 Query 5 for SQL
 project<X,Y>(Q)
+
 Query 6 for SQL
 select<doc_id = 1>(Clinique.Record)
