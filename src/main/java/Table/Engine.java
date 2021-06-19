@@ -1,7 +1,6 @@
 package Table;
 
 import DataBase.DataBase;
-import Table.Table;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,11 +28,12 @@ public class Engine {
 
     /**
      * execute query from input
-     *
+     * <p>
      * project -> @
      * select -> #
      * join -> *
      * union -> +
+     *
      * @param p_queryFormula
      * @return
      */
@@ -41,7 +41,7 @@ public class Engine {
         Stack<String> operation = new Stack<>();
         Stack<Table> result = new Stack<>();
 
-        p_queryFormula = formate(p_queryFormula);
+        p_queryFormula = getTypeTranslate(p_queryFormula);
 
         for (int i = 0; i < p_queryFormula.length(); i++) {
             String op = p_queryFormula.substring(i, i + 1);
@@ -73,20 +73,20 @@ public class Engine {
                 if (operator1.equals("(")) {
                     if (operator2.contains("@") || operator2.contains("#")) {
                         Table t1 = result.pop();
-                        res = executeUnaryOp(operator2, t1);
+                        res = exeUnaryPredicate(operator2, t1);
                     } else {
                         Table t1 = result.pop();
                         Table t2 = result.pop();
-                        res = executeBiOp(operator2, t1, t2);
+                        res = exeBinaryPredicate(operator2, t1, t2);
                     }
                 } else {
                     if (operator1.contains("@") || operator2.contains("#")) {
                         Table t1 = result.pop();
-                        res = executeUnaryOp(operator1, t1);
+                        res = exeUnaryPredicate(operator1, t1);
                     } else {
                         Table t1 = result.pop();
                         Table t2 = result.pop();
-                        res = executeBiOp(operator1, t1, t2);
+                        res = exeBinaryPredicate(operator1, t1, t2);
                     }
                 }
                 result.push(res);
@@ -105,11 +105,11 @@ public class Engine {
             String op = operation.pop();
             if (op.contains("@") || op.contains("#")) {
                 Table table = result.pop();
-                result.push(executeUnaryOp(op, table));
+                result.push(exeUnaryPredicate(op, table));
             } else {
                 Table table1 = result.pop();
                 Table table2 = result.pop();
-                result.push(executeBiOp(op, table1, table2));
+                result.push(exeBinaryPredicate(op, table1, table2));
             }
         }
 
@@ -126,18 +126,18 @@ public class Engine {
      * @return
      * @throws Exception
      */
-    private Table executeUnaryOp(String p_operator, Table p_table) throws Exception {
+    private Table exeUnaryPredicate(String p_operator, Table p_table) throws Exception {
         Table res = new Table("");
         if (p_operator.contains("@")) {
             String columns = p_operator.replaceAll("@", "")
                     .replaceAll("<", "")
                     .replaceAll(">", "");
-            res = projectForAll(columns, p_table, Integer.toString(this.d_type));
+            res = projectOperation(columns, p_table, Integer.toString(this.d_type));
         } else if (p_operator.contains("#")) {
             String conditions = p_operator.replaceAll("#", "");
             conditions = conditions.substring(1, conditions.length() - 1);
 
-            res = selectForAll(conditions, p_table);
+            res = selectOperation(conditions, p_table);
         }
         return res;
     }
@@ -151,11 +151,11 @@ public class Engine {
      * @return
      * @throws Exception
      */
-    private Table executeBiOp(String p_operator, Table p_tableA, Table p_tableB) throws Exception {
+    private Table exeBinaryPredicate(String p_operator, Table p_tableA, Table p_tableB) throws Exception {
         if (p_operator.contains("*")) {
-            return joinForAll(p_tableA, p_tableB, Integer.toString(this.d_type));
+            return joinOperation(p_tableA, p_tableB, Integer.toString(this.d_type));
         } else if (p_operator.contains("+")) {
-            return unionForAll(p_tableA, p_tableB, Integer.toString(this.d_type));
+            return unionOperation(p_tableA, p_tableB, Integer.toString(this.d_type));
         } else {
             return new Table("");
         }
@@ -203,7 +203,7 @@ public class Engine {
      * @param formula
      * @return sign
      */
-    private String formate(String formula) {
+    private String getTypeTranslate(String formula) {
         return formula.replaceAll("project", "@")
                 .replaceAll("select", "#")
                 .replaceAll("join", "*")
@@ -221,10 +221,10 @@ public class Engine {
      * select operation for table
      *
      * @param p_conditions SQL condition
-     * @param p_table selected table
+     * @param p_table      selected table
      * @return
      */
-    public Table selectForAll(String p_conditions, Table p_table) {
+    public Table selectOperation(String p_conditions, Table p_table) {
         String[] separateConditions = p_conditions.split(",");
 
         Table l_selectTable = new Table("Select Table");
@@ -233,24 +233,28 @@ public class Engine {
 
         for (ArrayList<String> eachLineInTable : p_table.d_contentTable) {
             boolean satisfyCondition = true;
-
+            /*
+            validation part
+            */
             for (int i = 0; i < separateConditions.length; i++) {
                 String[] presentCondition = separateConditions[i].split(" ");
                 String title = presentCondition[0];
                 String operator = presentCondition[1];
                 String value = presentCondition[2];
-
                 int presentTitleLocation = p_table.d_title.indexOf(title);
-
-                if(operator.equals("=") || operator.equals("!")){
+                if (operator.equals("=")) {
+                    if (!eachLineInTable.get(presentTitleLocation).equals(value)) {
+                        satisfyCondition = false;
+                    }
+                } else if (operator.equals("!")) {
                     if (eachLineInTable.get(presentTitleLocation).equals(value)) {
                         satisfyCondition = false;
                     }
-                }else if (operator.equals(">")){
+                } else if (operator.equals(">")) {
                     if (Integer.parseInt(eachLineInTable.get(presentTitleLocation)) <= Integer.parseInt(value)) {
                         satisfyCondition = false;
                     }
-                }else if(operator.equals("<")){
+                } else if (operator.equals("<")) {
                     if (Integer.parseInt(eachLineInTable.get(presentTitleLocation)) >= Integer.parseInt(value)) {
                         satisfyCondition = false;
                     }
@@ -259,13 +263,15 @@ public class Engine {
                     break;
                 }
             }
+            /*
+            execution part by choosing the operation type
+            */
             if (satisfyCondition) {
                 l_selectTable.d_contentTable.add(eachLineInTable);
             }
         }
         return l_selectTable;
     }
-
 
 
     /**
@@ -277,18 +283,21 @@ public class Engine {
      * @return
      * @throws Exception
      */
-    public Table projectForAll(String p_columns, Table p_table, String p_operationType) throws Exception {
+    public Table projectOperation(String p_columns, Table p_table, String p_operationType) throws Exception {
 
         Table l_projectTable = new Table("Project Table");
         String[] l_columnArr = p_columns.split(",");
-        String l_columnsAndannotation = p_columns + ",a nnotation";
-        l_projectTable.createColumn(l_columnsAndannotation);
-
+        String l_columnsAndAnnotation = p_columns + ",annotation";
+        l_projectTable.createColumn(l_columnsAndAnnotation);
         for (String column : l_projectTable.d_title) {
             if (!p_table.d_title.contains(column)) {
                 System.out.println("ERROR: wrong project column");
             }
         }
+
+          /*
+        validation part
+         */
         ArrayList<ArrayList<String>> newContent = new ArrayList<ArrayList<String>>();
         for (ArrayList<String> row : p_table.d_contentTable) {
             ArrayList<String> newRow = new ArrayList<String>();
@@ -306,6 +315,9 @@ public class Engine {
                         break;
                     }
                 }
+                  /*
+                execution part by choosing the operation type
+                 */
                 if (findSameContentRow) {
                     String newAnnotation = "";
                     switch (p_operationType) {
@@ -315,6 +327,7 @@ public class Engine {
                                     "";
                             break;
                         case "2":
+                            // independent function alpha+beta- (alpha * beta)
                             newAnnotation = Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)) +
                                     Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1)) -
                                     Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)) *
@@ -364,7 +377,7 @@ public class Engine {
      * @return
      * @throws Exception
      */
-    public Table unionForAll(Table p_tableA, Table p_tableB, String p_operationType) throws Exception {
+    public Table unionOperation(Table p_tableA, Table p_tableB, String p_operationType) throws Exception {
 
         if (p_tableA.d_title.size() != p_tableB.d_title.size()) {
             throw new Exception("ERROR: if two table union they must have same number of column");
@@ -379,6 +392,10 @@ public class Engine {
         Table l_unionTable = new Table("UnionTable");
         ArrayList<ArrayList<String>> newTableOfTableAB = new ArrayList<ArrayList<String>>();
         newTableOfTableAB.addAll(p_tableA.d_contentTable);
+
+        /*
+        validation part
+         */
 
         HashMap<Integer, Integer> orderOfAMapToOrderOfB = new HashMap<Integer, Integer>();
 
@@ -403,6 +420,9 @@ public class Engine {
                         break;
                     }
                 }
+                /*
+                execution part by choosing the operation type
+                 */
                 if (findSameRowInA) {
                     // calculate annotation
                     String newAnnotation = "";
@@ -413,6 +433,7 @@ public class Engine {
                                     Integer.parseInt(newLine.get(p_tableA.d_title.size() - 1)) + "";
                             break;
                         case "2":
+                            // independent function alpha+beta- (alpha * beta)
                             newAnnotation = Float.parseFloat(lineInTableA.get(p_tableA.d_title.size() - 1)) +
                                     Float.parseFloat(newLine.get(p_tableA.d_title.size() - 1)) -
                                     Float.parseFloat(lineInTableA.get(p_tableA.d_title.size() - 1)) *
@@ -458,12 +479,12 @@ public class Engine {
      *
      * @param p_tableA
      * @param p_tableB
-     * @param p_operationType 1 : bag 2 : probability  3 : certainty  4 : polynomial 5 : normal
+     * @param p_operationType 1 : bag 2 : probability  3 : certainty  4 : polynomial 5 : SQL
      * @return jointable
      */
-    public Table joinForAll(Table p_tableA, Table p_tableB, String p_operationType) {
+    public Table joinOperation(Table p_tableA, Table p_tableB, String p_operationType) {
 
-        Table l_joinTable = new Table("joinTable");
+        Table l_joinTable = new Table("Join Table");
         l_joinTable.d_title.addAll(p_tableA.d_title);
 
         HashMap<Integer, Integer> sameColumnLocationFromAToB = new HashMap<Integer, Integer>();
@@ -487,6 +508,11 @@ public class Engine {
                 l_joinTable.d_title.add(p_tableB.d_title.get(i));
             }
         }
+
+        /*
+        validation part
+         */
+
         l_joinTable.d_title.add("annotation");
         l_joinTable.d_columnCounter = p_tableA.d_columnCounter + locationColumnInBNotInA.size();
 
@@ -500,6 +526,11 @@ public class Engine {
                         break;
                     }
                 }
+
+                  /*
+                execution part by choosing the operation type
+                 */
+
                 if (rightnessFlag) {
                     ArrayList<String> newLine = new ArrayList<>();
                     for (int i = 0; i < lineInA.size() - 1; i++) {
