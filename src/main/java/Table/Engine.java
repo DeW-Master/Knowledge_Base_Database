@@ -242,11 +242,7 @@ public class Engine {
 
                 int presentTitleLocation = p_table.d_title.indexOf(title);
 
-                if(operator.equals("=") ){
-                    if (!eachLineInTable.get(presentTitleLocation).equals(value)) {
-                        satisfyCondition = false;
-                    }
-                }else if(operator.equals("!=") ){
+                if(operator.equals("=") || operator.equals("!")){
                     if (eachLineInTable.get(presentTitleLocation).equals(value)) {
                         satisfyCondition = false;
                     }
@@ -312,33 +308,37 @@ public class Engine {
                 }
                 if (findSameContentRow) {
                     String newAnnotation = "";
-
-                    if (p_operationType.equals("1")) {
-                        newAnnotation = Integer.parseInt(lineInNewContent.get(l_projectTable.d_title.size() - 1)) +
-                                Integer.parseInt(newRow.get(l_projectTable.d_title.size() - 1)) +
-                                "";
-                    } else if (p_operationType.equals("2")) {
-                        newAnnotation = Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)) +
-                                Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1)) -
-                                Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)) *
-                                        Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1)) +
-                                "";
-                    } else if (p_operationType.equals("3")){
-                        newAnnotation = Math.max(Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)),
-                                Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1))) +
-                                "";
-                    }else if(p_operationType.equals("4")) {
-                        newAnnotation = "(" +
-                                lineInNewContent.get(l_projectTable.d_title.size() - 1) +
-                                "+" +
-                                newRow.get(l_projectTable.d_title.size() - 1) +
-                                ")";
-                    }else if(p_operationType.equals("5")) {
-                        newAnnotation = Math.max(Integer.parseInt(lineInNewContent.get(l_projectTable.d_title.size() - 1)),
-                                Integer.parseInt(newRow.get(l_projectTable.d_title.size() - 1))) +
-                                "";
+                    switch (p_operationType) {
+                        case "1":
+                            newAnnotation = Integer.parseInt(lineInNewContent.get(l_projectTable.d_title.size() - 1)) +
+                                    Integer.parseInt(newRow.get(l_projectTable.d_title.size() - 1)) +
+                                    "";
+                            break;
+                        case "2":
+                            newAnnotation = Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)) +
+                                    Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1)) -
+                                    Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)) *
+                                            Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1)) +
+                                    "";
+                            break;
+                        case "3":
+                            newAnnotation = Math.max(Float.parseFloat(lineInNewContent.get(l_projectTable.d_title.size() - 1)),
+                                    Float.parseFloat(newRow.get(l_projectTable.d_title.size() - 1))) +
+                                    "";
+                            break;
+                        case "4":
+                            newAnnotation = "(" +
+                                    lineInNewContent.get(l_projectTable.d_title.size() - 1) +
+                                    "+" +
+                                    newRow.get(l_projectTable.d_title.size() - 1) +
+                                    ")";
+                            break;
+                        case "5":
+                            newAnnotation = Math.max(Integer.parseInt(lineInNewContent.get(l_projectTable.d_title.size() - 1)),
+                                    Integer.parseInt(newRow.get(l_projectTable.d_title.size() - 1))) +
+                                    "";
+                            break;
                     }
-
                     lineInNewContent.remove(l_projectTable.d_title.size() - 1);
                     lineInNewContent.add(newAnnotation);
                     findNewAnnotation = true;
@@ -406,30 +406,35 @@ public class Engine {
                 if (findSameRowInA) {
                     // calculate annotation
                     String newAnnotation = "";
-                     if (p_operationType.equals("1")) {
+                    switch (p_operationType) {
+
+                        case "1":
                             newAnnotation = Integer.parseInt(lineInTableA.get(p_tableA.d_title.size() - 1)) +
                                     Integer.parseInt(newLine.get(p_tableA.d_title.size() - 1)) + "";
-
-                     } else if (p_operationType.equals("2")) {
+                            break;
+                        case "2":
                             newAnnotation = Float.parseFloat(lineInTableA.get(p_tableA.d_title.size() - 1)) +
                                     Float.parseFloat(newLine.get(p_tableA.d_title.size() - 1)) -
                                     Float.parseFloat(lineInTableA.get(p_tableA.d_title.size() - 1)) *
                                             Float.parseFloat(newLine.get(p_tableA.d_title.size() - 1)) +
                                     "";
-                     } else if (p_operationType.equals("3")) {
+                            break;
+                        case "3":
                             newAnnotation = Math.max(Float.parseFloat(lineInTableA.get(p_tableA.d_title.size() - 1)), Float.parseFloat(newLine.get(p_tableA.d_title.size() - 1))) + "";
-                     } else if (p_operationType.equals("4")) {
+                            break;
+                        case "4":
                             newAnnotation = "(" +
                                     lineInTableA.get(p_tableA.d_title.size() - 1) +
                                     "+" +
                                     newLine.get(p_tableA.d_title.size() - 1) +
                                     ")";
-                     } else if (p_operationType.equals("5")) {
-                         newAnnotation = Math.max(Integer.parseInt(lineInTableA.get(p_tableA.d_title.size() - 1)), Integer.parseInt(newLine.get(p_tableA.d_title.size() - 1))) + "";
-                     }
+                            break;
+                        case "5":
+                            newAnnotation = Math.max(Integer.parseInt(lineInTableA.get(p_tableA.d_title.size() - 1)), Integer.parseInt(newLine.get(p_tableA.d_title.size() - 1))) + "";
+                            break;
 
 
-
+                    }
                     newTableOfTableAB.get(p_tableA.d_contentTable.indexOf(lineInTableA)).remove(p_tableA.d_title.size() - 1);
                     newTableOfTableAB.get(p_tableA.d_contentTable.indexOf(lineInTableA)).add(newAnnotation);
 
@@ -504,26 +509,31 @@ public class Engine {
                         newLine.add(lineInB.get(location));
                     }
                     String newAnnotation = "";
-                    if (p_operationType.equals("1")) {
-                        newAnnotation = Integer.parseInt(lineInA.get(p_tableA.d_title.size() - 1)) *
-                                Integer.parseInt(lineInB.get(p_tableB.d_title.size() - 1)) +
-                                "";
-                    } else if (p_operationType.equals("2")) {
+                    switch (p_operationType) {
+                        case "1":
+                            newAnnotation = Integer.parseInt(lineInA.get(p_tableA.d_title.size() - 1)) *
+                                    Integer.parseInt(lineInB.get(p_tableB.d_title.size() - 1)) +
+                                    "";
+                            break;
+                        case "2":
                             newAnnotation = Float.parseFloat(lineInA.get(p_tableA.d_title.size() - 1)) *
                                     Float.parseFloat(lineInB.get(p_tableB.d_title.size() - 1)) +
                                     "";
-                    } else if (p_operationType.equals("3")) {
+                            break;
+                        case "3":
                             newAnnotation = Math.min(Float.parseFloat(lineInA.get(p_tableA.d_title.size() - 1)),
                                     Float.parseFloat(lineInB.get(p_tableB.d_title.size() - 1))) +
                                     "";
-                    } else if (p_operationType.equals("4")) {
+                            break;
+                        case "4":
                             newAnnotation = lineInA.get(p_tableA.d_title.size() - 1) + "*" + lineInB.get(p_tableB.d_title.size() - 1);
-                    } else if (p_operationType.equals("5")) {
+                            break;
+                        case "5":
                             newAnnotation = Math.max(Integer.parseInt(lineInA.get(p_tableA.d_title.size() - 1)),
                                     Integer.parseInt(lineInB.get(p_tableB.d_title.size() - 1))) +
                                     "";
+                            break;
                     }
-
                     newLine.add(newAnnotation);
                     l_joinTable.d_contentTable.add(newLine);
                 }
