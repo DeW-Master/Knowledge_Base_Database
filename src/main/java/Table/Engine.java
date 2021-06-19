@@ -389,7 +389,7 @@ public class Engine {
             }
         }
 
-        Table l_unionTable = new Table("UnionTable");
+        Table l_unionTable = new Table("Union Table");
         ArrayList<ArrayList<String>> newTableOfTableAB = new ArrayList<ArrayList<String>>();
         newTableOfTableAB.addAll(p_tableA.d_contentTable);
 
