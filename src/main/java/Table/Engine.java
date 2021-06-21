@@ -13,7 +13,7 @@ import java.util.Stack;
 public class Engine {
 
     /**
-     * p_operationType 1 : bag 2 : probability  3 : certainty  4 : polynomial 5 : normal
+     * p_operationType 1 : bag 2 : probability  3 : certainty  4 : polynomial 5 : sql
      */
     public int d_type;
     /**
